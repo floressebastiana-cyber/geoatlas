@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Aprende a ubicar los países, continentes y océanos del mundo en un mapa interactivo.">
+<title>GeoAtlas · Explora el mundo</title>
+<link rel="stylesheet" href="style.css">
+<script defer src="map-data.js"></script>
+<script defer src="game.js"></script>
+</head>
+<body>
+<header class="top"><div class="brand"><span class="logo" aria-hidden="true">◎</span><div><strong>GeoAtlas</strong><small>ATLAS INTERACTIVO</small></div></div><button id="audio" aria-pressed="false">♫ <span>Voz desactivada</span></button></header>
+<main>
+  <div class="intro"><div><h1>Explora el mundo<span>.</span></h1><p>Aprende geografía, un lugar a la vez.</p></div><div class="tabs" aria-label="Modo de juego"><button id="quiz" aria-pressed="true">Jugar</button><button id="study" aria-pressed="false">Estudiar</button></div></div>
+  <nav id="regions" aria-label="Ámbito de juego"></nav>
+  <div class="layout">
+    <section class="map-card" aria-label="Mapa interactivo">
+      <div class="map-header"><strong id="map-title">Mapa mundial</strong><span><i></i> Interactivo</span></div>
+      <div class="stage">
+        <svg id="map" aria-label="Mapa para seleccionar lugares" viewBox="0 0 360 153">
+          <defs><pattern id="grid" width="15" height="15" patternUnits="userSpaceOnUse"><path d="M15 0H0V15" fill="none" stroke="#b9d4dc" stroke-width=".24"/></pattern></defs>
+          <rect x="-500" y="-500" width="1400" height="1200" fill="#dceef2"/>
+          <rect x="-500" y="-500" width="1400" height="1200" fill="url(#grid)"/>
+          <g id="waters"></g><g id="lands"></g><g id="markers"></g>
+        </svg>
+        <div class="zoom" aria-label="Controles del mapa"><button id="zoom-in" aria-label="Acercar">+</button><button id="zoom-out" aria-label="Alejar">−</button><button id="reset" aria-label="Centrar mapa">⌖</button></div>
+      </div>
+      <div class="map-footer"><span>Arrastra para mover el mapa · Usa + y − para ampliar</span><a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a></div>
+    </section>
+    <aside>
+      <section class="question">
+        <div class="question-top"><strong id="mode-label">DESAFÍO</strong><span id="step"></span></div>
+        <div class="progress"><div id="bar"></div></div>
+        <div class="prompt"><p id="instruction"></p><h2 id="target"></h2><button id="speak" aria-label="Escuchar nombre" title="Escuchar nombre">♫</button></div>
+        <p id="feedback" role="status"></p>
+        <div class="actions"><button id="hint">Pista</button><button id="skip">Saltar</button></div>
+        <button id="restart" class="primary" hidden>Jugar de nuevo</button>
+      </section>
+      <section class="stats" aria-label="Resultados">
+        <div><span>Aciertos</span><strong id="correct">0</strong></div><div><span>Errores</span><strong id="errors">0</strong></div><div><span>Racha</span><strong id="streak">0</strong></div>
+      </section>
+    </aside>
+  </div>
+  <footer><span>GeoAtlas</span><span id="scope"></span><button id="new-round">Reiniciar partida</button></footer>
+</main>
+</body>
+</html>
