@@ -7,6 +7,7 @@
 <title>geoatlas · Explora el mundo</title>
 <link rel="stylesheet" href="style.css">
 <script defer src="map-data.js"></script>
+<script defer src="south-america.js"></script>
 <script defer src="game.js"></script>
 </head>
 <body>
@@ -14,6 +15,10 @@
 <main>
   <div class="intro"><div><h1>Explora el mundo<span>.</span></h1><p>Aprende geografía, un lugar a la vez.</p></div><div class="tabs" aria-label="Modo de juego"><button id="quiz" aria-pressed="true">Jugar</button><button id="study" aria-pressed="false">Estudiar</button></div></div>
   <nav id="regions" aria-label="Ámbito de juego"></nav>
+  <div id="south-menu" class="south-menu" hidden>
+    <div class="south-tabs" role="group" aria-label="Contenido de Sudamérica"><button id="south-countries" aria-pressed="true">Países</button><button id="south-physical" aria-pressed="false">Geografía física</button></div>
+    <label id="physical-picker" hidden>Tema <select id="physical-category"></select></label>
+  </div>
   <div class="layout">
     <section class="map-card" aria-label="Mapa interactivo">
       <div class="map-header"><strong id="map-title">Mapa mundial</strong><span><i></i> Interactivo</span></div>

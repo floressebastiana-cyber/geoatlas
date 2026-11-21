@@ -18,6 +18,8 @@ const playable = countries.filter(country => country.play);
 const speechAvailable = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
 let region = 'Mundo';
 let study = false;
+let southPhysical = false;
+const physicalActive = () => region === 'Sudamérica' && southPhysical;
 let audio = false;
 let queue = [];
 let current = 0;
@@ -49,12 +51,15 @@ function interactive(element, item) {
 function updateView(next) {
   view = next.slice();
   map.setAttribute('viewBox', view.join(' '));
-  for (const dot of $('markers').children) dot.setAttribute('r', Math.min(1.25, view[2] / 230));
+  const scale = map.getScreenCTM()?.a;
+  for (const dot of $('markers').children) {
+    dot.setAttribute('r', physicalActive() && scale ? 7 / scale : Math.min(1.25, view[2] / 230));
+  }
 }
 
 function zoom(scale) {
   const [x,y,w,h] = view;
-  if (w*scale < 2 || w*scale > 540) return;
+  if (w*scale < (physicalActive() ? .04 : 2) || w*scale > 540) return;
   updateView([x + w*(1-scale)/2, y + h*(1-scale)/2, w*scale, h*scale]);
 }
 
@@ -100,7 +105,17 @@ function setupMap() {
       $('markers').append(dot);
     }
   }
-  homeView = continentalViews[region] || (oceanMode || continentMode ? [0,0,360,175] : worldView);
+  if (physicalActive()) {
+    for (const item of queue) {
+      const [cx, cy] = item.anchor;
+      const dot = svgElement('circle',{cx,cy,class:'physical-dot'});
+      interactive(dot,item);
+      $('markers').append(dot);
+    }
+    homeView = [77, 67, 73, 78];
+  } else {
+    homeView = continentalViews[region] || (oceanMode || continentMode ? [0,0,360,175] : worldView);
+  }
   updateView(homeView);
 }
 
@@ -135,8 +150,8 @@ function updatePanel() {
   $('skip').hidden = study || done;
   $('restart').hidden = !done;
   $('new-round').hidden = study;
-  $('scope').textContent = queue.length + (region === 'Océanos' ? ' océanos' : region === 'Continentes' ? ' continentes' : ' países');
-  $('map-title').textContent = region==='Mundo' ? 'Mapa mundial' : region;
+  $('scope').textContent = queue.length + (physicalActive() ? ' lugares' : region === 'Océanos' ? ' océanos' : region === 'Continentes' ? ' continentes' : ' países');
+  $('map-title').textContent = physicalActive() ? 'Sudamérica · ' + $('physical-category').value : region==='Mundo' ? 'Mapa mundial' : region;
   updateScores();
   if (!study && audio && target) say(target.name);
 }
@@ -147,7 +162,11 @@ function start() {
   locked = false;
   current = correct = errors = streak = 0;
   completed = new Set();
-  const items = region === 'Océanos' ? oceans : region === 'Continentes' ? continents : playable.filter(c=>region==='Mundo' || c.region===region);
+  $('south-menu').hidden = region !== 'Sudamérica';
+  $('physical-picker').hidden = !physicalActive();
+  $('south-countries').setAttribute('aria-pressed',String(!southPhysical));
+  $('south-physical').setAttribute('aria-pressed',String(southPhysical));
+  const items = physicalActive() ? southAmericaPlaces[$('physical-category').value] : region === 'Océanos' ? oceans : region === 'Continentes' ? continents : playable.filter(c=>region==='Mundo' || c.region===region);
   queue = shuffle(items);
   for (const button of $('regions').children) button.setAttribute('aria-pressed',String(button.textContent===region));
   $('quiz').setAttribute('aria-pressed',String(!study));
@@ -171,6 +190,14 @@ function paint(id, style) {
 }
 
 function focusItem(item) {
+  if (physicalActive()) {
+    const [x,y] = item.anchor;
+    const neighbors = queue.filter(other=>other !== item);
+    const distance = Math.min(...neighbors.map(({anchor:[ox,oy]})=>Math.hypot(x-ox,y-oy)));
+    const width = Math.max(.06, Math.min(14,distance*7));
+    updateView([x-width/2,y-width*.35,width,width*.7]);
+    return;
+  }
   if (!item.box) return;
   const [x1,y1,x2,y2] = item.box;
   const width = Math.min(360, Math.max(6, (x2-x1)*1.65, (y2-y1)*2.7));
@@ -186,7 +213,7 @@ function answer(id) {
     completed = new Set([id]);
     paint(id,'correct');
     $('target').textContent = item.name;
-    $('feedback').textContent = item.region || region;
+    $('feedback').textContent = item.elevation ? item.elevation.toLocaleString('es-CL') + ' m según la lámina' : item.region || region;
     if (audio) say(item.name);
     return;
   }
@@ -223,6 +250,16 @@ function advance(message, delay) {
     updatePanel();
   },delay);
 }
+
+for (const category of Object.keys(southAmericaPlaces)) {
+  const option = document.createElement('option');
+  option.value = option.textContent = category;
+  $('physical-category').append(option);
+}
+$('south-countries').onclick = () => { if (southPhysical) {southPhysical=false;start();} };
+$('south-physical').onclick = () => { if (!southPhysical) {southPhysical=true;start();} };
+$('physical-category').onchange = start;
+window.addEventListener('resize',()=>updateView(view));
 
 for (const scope of regions) {
   const button = document.createElement('button');
