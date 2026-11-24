@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Aprende a ubicar los países, continentes y océanos del mundo en un mapa interactivo.">
 <title>geoatlas · Explora el mundo</title>
-<link rel="stylesheet" href="style.css?v=chile">
+<link rel="stylesheet" href="style.css?v=chile-voz">
 <script defer src="map-data.js"></script>
 <script defer src="south-america.js"></script>
 <script defer src="chile-map.js"></script>
 <script defer src="chile.js"></script>
-<script defer src="game.js?v=chile"></script>
+<script defer src="voice-index.js"></script>
+<script defer src="game.js?v=chile-voz"></script>
 </head>
 <body>
-<header class="top"><div class="brand"><span class="logo" aria-hidden="true">◎</span><div><strong>geoatlas</strong><small>ATLAS INTERACTIVO</small></div></div><div class="audio-controls"><label class="voice-picker">Voz <select id="voice"><option value="">Automática</option></select></label><button id="effects" aria-pressed="true">Aplausos activados</button><button id="audio" aria-pressed="false">♫ <span>Voz desactivada</span></button></div></header>
+<header class="top"><div class="brand"><span class="logo" aria-hidden="true">◎</span><div><strong>geoatlas</strong><small>ATLAS INTERACTIVO</small></div></div><div class="audio-controls"><label class="voice-picker">Voz <select id="voice"><option value="">Daniela · Argentina</option></select></label><button id="effects" aria-pressed="true">Aplausos activados</button><button id="audio" aria-pressed="false">♫ <span>Voz desactivada</span></button></div></header>
 <main>
   <div class="intro"><div><h1>Explora el mundo<span>.</span></h1><p>Aprende geografía, un lugar a la vez.</p></div><div class="tabs" aria-label="Modo de juego"><button id="quiz" aria-pressed="true">Jugar</button><button id="study" aria-pressed="false">Estudiar</button></div></div>
   <nav id="regions" aria-label="Ámbito de juego"></nav>
@@ -55,7 +56,7 @@
       </section>
     </aside>
   </div>
-  <footer><span>geoatlas</span><span id="scope"></span><button id="new-round">Reiniciar partida</button></footer>
+  <footer><span>geoatlas <a class="data-credit" href="credits.html">Créditos</a></span><span id="scope"></span><button id="new-round">Reiniciar partida</button></footer>
 </main>
 </body>
 </html>

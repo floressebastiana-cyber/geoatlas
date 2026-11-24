@@ -19,3 +19,4 @@ aside{display:grid;gap:13px}.question{padding:20px}.question-top{display:flex;ju
 #map.chile-map .land:not(.chile-shape){opacity:.5}
 #map .water{fill:var(--water-fill,#c7e4ef)}
 @media(max-width:800px){.top{height:auto;min-height:72px;padding-top:8px;padding-bottom:8px;gap:9px;flex-wrap:wrap}.top .audio-controls{gap:5px}.top button{padding:6px 8px;font-size:13px}.voice-picker select{max-width:130px}}
+.data-credit{color:var(--green);margin-left:.45rem}

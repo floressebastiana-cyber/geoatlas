@@ -32,6 +32,12 @@ const oceans = [
 const continents = [...Object.entries(continentalViews).map(([id,box])=>({id,name:id,box:[box[0],box[1],box[0]+box[2],box[1]+box[3]]})), {id:'Antártida',name:'Antártida',box:[0,140,360,175]}];
 const playable = countries.filter(country => country.play);
 const speechAvailable = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+const VoiceContext = window.AudioContext || window.webkitAudioContext;
+const voiceSupported = !!VoiceContext || speechAvailable;
+let voiceContext;
+let voiceBuffer;
+let voiceSource;
+let voiceRequest = 0;
 const applause = new Audio('applause.wav');
 applause.volume = .42;
 let effects = true;
@@ -222,12 +228,48 @@ function refreshVoices() {
     select.append(option);
   }
   if ([...select.options].some(option=>option.value===previous)) select.value = previous;
-  select.disabled = select.options.length === 1;
+  select.disabled = select.options.length === 1 && !VoiceContext;
 }
 
-function say(name) {
-  if (!speechAvailable || !name) return;
-  window.speechSynthesis.cancel();
+function stopVoice() {
+  voiceRequest++;
+  if (voiceSource) {
+    voiceSource.stop();
+    voiceSource = null;
+  }
+  if (speechAvailable) window.speechSynthesis.cancel();
+}
+
+async function say(name) {
+  if (!voiceSupported || !name) return;
+  stopVoice();
+  const request = voiceRequest;
+  const clip = Object.hasOwn(recordedPrompts,name) && recordedPrompts[name];
+  if (!$('voice').value && VoiceContext && clip) {
+    try {
+      voiceContext ||= new VoiceContext();
+      const resumed = voiceContext.resume();
+      voiceBuffer ||= fetch('voice-daniela.mp3')
+        .then(response=>{
+          if (!response.ok) throw Error('No se pudo cargar la voz');
+          return response.arrayBuffer();
+        })
+        .then(bytes=>voiceContext.decodeAudioData(bytes));
+      const [, buffer] = await Promise.all([resumed,voiceBuffer]);
+      if (voiceRequest !== request) return;
+      const source = voiceContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(voiceContext.destination);
+      source.onended = () => { if (voiceSource === source) voiceSource = null; };
+      source.start(0,clip[0],clip[1]);
+      voiceSource = source;
+      return;
+    } catch {
+      voiceBuffer = null;
+      if (voiceRequest !== request) return;
+    }
+  }
+  if (!speechAvailable) return;
   const sentence = new SpeechSynthesisUtterance(name);
   const voices = spanishVoices();
   const selected = voices.find(voice=>voice.voiceURI===$('voice').value) || voices[0];
@@ -246,7 +288,7 @@ function updatePanel() {
   $('instruction').textContent = study ? 'Toca cualquier lugar activo' : done ? 'Partida completada' : 'Encuentra en el mapa';
   $('target').textContent = study ? 'Explora el mapa' : done ? '¡Bien hecho!' : target.name;
   $('feedback').textContent = study ? 'Selecciona un lugar para conocer su nombre.' : done ? correct + ' aciertos de ' + queue.length + ' lugares.' : 'Selecciona el lugar indicado.';
-  $('speak').hidden = !speechAvailable || study || done;
+  $('speak').hidden = !voiceSupported || study || done;
   $('hint').hidden = study || done;
   $('skip').hidden = study || done;
   $('restart').hidden = !done;
@@ -259,7 +301,7 @@ function updatePanel() {
 
 function start() {
   clearTimeout(timer);
-  if (speechAvailable) window.speechSynthesis.cancel();
+  stopVoice();
   locked = false;
   current = correct = errors = streak = 0;
   completed = new Set();
@@ -405,8 +447,8 @@ $('quiz').onclick = () => { if (study) {study=false;start();} };
 $('study').onclick = () => { if (!study) {study=true;start();} };
 $('restart').onclick = $('new-round').onclick = start;
 $('speak').onclick = () => say(queue[current]?.name);
-$('audio').disabled = !speechAvailable;
-$('voice').closest('label').hidden = !speechAvailable;
+$('audio').disabled = !voiceSupported;
+$('voice').closest('label').hidden = !voiceSupported;
 if (speechAvailable) {
   refreshVoices();
   window.speechSynthesis.addEventListener('voiceschanged',refreshVoices);
@@ -420,13 +462,13 @@ $('effects').onclick = () => {
   $('effects').setAttribute('aria-pressed',String(effects));
   $('effects').textContent = effects ? 'Aplausos activados' : 'Aplausos desactivados';
 };
-$('audio').querySelector('span').textContent = speechAvailable ? 'Voz desactivada' : 'Voz no disponible';
+$('audio').querySelector('span').textContent = voiceSupported ? 'Voz desactivada' : 'Voz no disponible';
 $('audio').onclick = () => {
   audio = !audio;
   $('audio').setAttribute('aria-pressed',String(audio));
   $('audio').querySelector('span').textContent = audio ? 'Voz activada' : 'Voz desactivada';
   if (audio && !study) say(queue[current]?.name);
-  if (!audio) window.speechSynthesis.cancel();
+  if (!audio) stopVoice();
 };
 $('hint').onclick = () => {
   const item = queue[current];
