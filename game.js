@@ -5,7 +5,23 @@ const map = $('map');
 const worldView = [0, 0, 360, 175];
 const colors = {'Norteamérica':'#a8d6bc','Sudamérica':'#ecc489','Europa':'#edaca0','África':'#e4c46f','Asia':'#bcb9e1','Oceanía':'#81c9c1'};
 const continentalViews = {'Norteamérica':[0,0,142,82],'Sudamérica':[92,69,58,76],'Europa':[146,10,84,47],'África':[155,43,86,82],'Asia':[200,5,160,94],'Oceanía':[285,79,105,65]};
-const regions = ['Mundo', ...Object.keys(colors), 'Continentes', 'Océanos'];
+const regions = ['Mundo', ...Object.keys(colors), 'Continentes', 'Océanos', 'Chile'];
+const countryPalettes = {
+  'Norteamérica':['#7ac7a0','#a0cf72','#69bcad','#b4d98a','#8ac7d3'],
+  'Sudamérica':['#f0b971','#ea9c75','#ebcc64','#d6c67e','#efafaa'],
+  'Europa':['#edaaa7','#eebbd6','#eaa584','#cd9cbb','#f3c28b'],
+  'África':['#e9c55e','#dfab65','#ecd982','#c9c979','#e6aa87'],
+  'Asia':['#afabdc','#a8bde7','#c4acd9','#a2b6d3','#d3bee8'],
+  'Oceanía':['#67c2be','#83d0cf','#90c9e0','#9acfaf','#80b8d6']
+};
+const waterColors = ['#aed6e8','#84c7db','#a4bcdf','#95d1cb','#bed7ee'];
+const chileColors = ['#e9a66d','#f2d26c','#b0c879','#f0ad92','#70c9bb','#97addf','#cbb0d7','#e7bd72','#8bc8da','#d4d17a','#eca59d','#9dc78c','#82ada9','#d2b98c','#ada5d9','#91c3e1'];
+const chileColor = new Map(chileDirectory.map(([code],index)=>[code,chileColors[index]]));
+const countryColor = new Map(countries.map((country,index)=>[
+  country.id, countryPalettes[country.region]?.[index % 5] || '#e3e8e4'
+]));
+const chileView = [98,101,23,42];
+const rapaNuiView = [70.28,111.88,.58,.55];
 const oceans = [
   {id:'arctic',name:'Océano Ártico',d:'M0 0H360V19H0Z',anchor:[165,12]},
   {id:'pacific',name:'Océano Pacífico',d:'M0 19H56L100 64L112 92L106 145H0ZM280 19H360V145H325L322 92L289 75Z',anchor:[36,91]},
@@ -16,6 +32,14 @@ const oceans = [
 const continents = [...Object.entries(continentalViews).map(([id,box])=>({id,name:id,box:[box[0],box[1],box[0]+box[2],box[1]+box[3]]})), {id:'Antártida',name:'Antártida',box:[0,140,360,175]}];
 const playable = countries.filter(country => country.play);
 const speechAvailable = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+const applause = new Audio('applause.wav');
+applause.volume = .42;
+let effects = true;
+const chileActive = () => region === 'Chile';
+const chileTheme = () => $('chile-category').value;
+const provincialMode = () => ['Provincias','Capitales provinciales'].includes(chileTheme());
+const capitalsMode = () => chileTheme().startsWith('Capitales');
+const pointMode = () => physicalActive() || (chileActive() && capitalsMode());
 let region = 'Mundo';
 let study = false;
 let southPhysical = false;
@@ -53,13 +77,13 @@ function updateView(next) {
   map.setAttribute('viewBox', view.join(' '));
   const scale = map.getScreenCTM()?.a;
   for (const dot of $('markers').children) {
-    dot.setAttribute('r', physicalActive() && scale ? 7 / scale : Math.min(1.25, view[2] / 230));
+    dot.setAttribute('r', pointMode() && scale ? 7 / scale : Math.min(1.25, view[2] / 230));
   }
 }
 
 function zoom(scale) {
   const [x,y,w,h] = view;
-  if (w*scale < (physicalActive() ? .04 : 2) || w*scale > 540) return;
+  if (w*scale < (pointMode() ? .04 : 2) || w*scale > 540) return;
   updateView([x + w*(1-scale)/2, y + h*(1-scale)/2, w*scale, h*scale]);
 }
 
@@ -67,14 +91,16 @@ function setupMap() {
   $('lands').replaceChildren();
   $('waters').replaceChildren();
   $('markers').replaceChildren();
+  $('chile-shapes').replaceChildren();
+  map.classList.toggle('chile-map',chileActive());
   const oceanMode = region === 'Océanos';
   const continentMode = region === 'Continentes';
   const available = new Set(queue.map(item=>item.id));
   const groups = new Map();
 
   if (oceanMode) {
-    for (const ocean of oceans) {
-      const path = svgElement('path',{d:ocean.d,class:'water'});
+    for (const [index,ocean] of oceans.entries()) {
+      const path = svgElement('path',{d:ocean.d,class:'water',style:'--water-fill:'+waterColors[index]});
       interactive(path,ocean);
       $('waters').append(path);
     }
@@ -82,8 +108,10 @@ function setupMap() {
   for (const country of countries) {
     const belongs = available.has(country.id);
     const continent = country.id === 'ATA' ? 'Antártida' : country.region;
-    const colored = !oceanMode && (belongs || continentMode || region === 'Mundo');
-    const path = svgElement('path',{d:country.d,fill:colored ? colors[continent] || '#e8efea' : '#e4eae5',class:'land'});
+    if (chileActive() && country.id === 'CHL') continue;
+    const colored = belongs || region === 'Mundo' || (physicalActive() && continent === 'Sudamérica');
+    const fill = continentMode ? colors[continent] || '#d1e2ec' : colored ? countryColor.get(country.id) : '#e3e9e2';
+    const path = svgElement('path',{d:country.d,fill,class:'land'});
     if (continentMode && available.has(continent)) {
       if (!groups.has(continent)) {
         const group = svgElement('g',{});
@@ -105,7 +133,10 @@ function setupMap() {
       $('markers').append(dot);
     }
   }
-  if (physicalActive()) {
+  if (chileActive()) {
+    drawChile(available);
+    homeView = chileViewForFilter();
+  } else if (physicalActive()) {
     for (const item of queue) {
       const [cx, cy] = item.anchor;
       const dot = svgElement('circle',{cx,cy,class:'physical-dot'});
@@ -119,6 +150,44 @@ function setupMap() {
   updateView(homeView);
 }
 
+function chileViewForFilter() {
+  const code = provincialMode() && $('chile-filter').value;
+  if (!code) return chileView;
+  const mainland = chileItems.Provincias.filter(item=>item.regionCode===code && item.provinceCode!=='052');
+  const xs = mainland.map(item=>item.anchor[0]);
+  const ys = mainland.map(item=>item.anchor[1]);
+  const width = Math.max(4, Math.max(...xs)-Math.min(...xs)+2);
+  const height = Math.max(4, Math.max(...ys)-Math.min(...ys)+2.4);
+  return [(Math.min(...xs)+Math.max(...xs)-width)/2,(Math.min(...ys)+Math.max(...ys)-height)/2,width,height];
+}
+
+function drawChile(available) {
+  const shapes = $('chile-shapes');
+  for (const item of chileItems.Regiones) {
+    const group = svgElement('g',{});
+    if (available.has(item.id)) interactive(group,item);
+    let provinceIndex = 0;
+    for (const province of chileItems.Provincias.filter(entry=>entry.regionCode===item.regionCode)) {
+      const active = available.has(province.id);
+      const fill = provincialMode()
+        ? ['#eab876','#89c8be','#a1a8dd','#edab9f','#b9ce7e','#92bfdd','#d6afd7','#e3ce75'][provinceIndex++]
+        : chileColor.get(item.regionCode);
+      const path = svgElement('path',{d:chilePaths[province.provinceCode],fill,class:'land chile-shape'});
+      if (provincialMode() && $('chile-filter').value && item.regionCode!==$('chile-filter').value) path.setAttribute('opacity','.52');
+      if (active) interactive(path,province);
+      group.append(path);
+    }
+    shapes.append(group);
+  }
+  if (!capitalsMode()) return;
+  for (const item of queue) {
+    const [cx,cy] = item.anchor;
+    const dot = svgElement('circle',{cx,cy,class:'physical-dot'});
+    interactive(dot,item);
+    $('markers').append(dot);
+  }
+}
+
 function shuffle(items) {
   const shuffled = items.slice();
   for (let i = shuffled.length-1; i>0; i--) {
@@ -128,11 +197,43 @@ function shuffle(items) {
   return shuffled;
 }
 
+function preferredVoice(voice) {
+  const lang = voice.lang.toLowerCase().replace('_','-');
+  const knownFemale = /paulina|monica|mónica|angelica|angélica|maria|maría|sabina|dalia|beatriz|salom[eé]|catalina|camila|valentina|elena|laura|carla|paloma|karla|jimena|renata|isabella|female/i.test(voice.name);
+  const latin = /^es-(?!es$)/.test(lang);
+  const natural = /natural|neural|online|premium|enhanced/i.test(voice.name);
+  return (latin ? 40 : 0) + (lang==='es-cl' ? 10 : 0) + (knownFemale ? 60 : 0)
+    + (knownFemale && latin ? 40 : 0) + (natural ? 20 : 0);
+}
+
+function spanishVoices() {
+  return window.speechSynthesis.getVoices().filter(voice=>/^es(?:[-_]|$)/i.test(voice.lang))
+    .sort((a,b)=>preferredVoice(b)-preferredVoice(a));
+}
+
+function refreshVoices() {
+  const select = $('voice');
+  const previous = select.value;
+  select.options.length = 1;
+  for (const voice of spanishVoices()) {
+    const option = document.createElement('option');
+    option.value = voice.voiceURI;
+    option.textContent = voice.name + ' (' + voice.lang + ')';
+    select.append(option);
+  }
+  if ([...select.options].some(option=>option.value===previous)) select.value = previous;
+  select.disabled = select.options.length === 1;
+}
+
 function say(name) {
   if (!speechAvailable || !name) return;
   window.speechSynthesis.cancel();
   const sentence = new SpeechSynthesisUtterance(name);
-  sentence.lang = 'es';
+  const voices = spanishVoices();
+  const selected = voices.find(voice=>voice.voiceURI===$('voice').value) || voices[0];
+  if (selected) sentence.voice = selected;
+  sentence.lang = selected?.lang || 'es-CL';
+  sentence.rate = .94;
   window.speechSynthesis.speak(sentence);
 }
 
@@ -150,8 +251,8 @@ function updatePanel() {
   $('skip').hidden = study || done;
   $('restart').hidden = !done;
   $('new-round').hidden = study;
-  $('scope').textContent = queue.length + (physicalActive() ? ' lugares' : region === 'Océanos' ? ' océanos' : region === 'Continentes' ? ' continentes' : ' países');
-  $('map-title').textContent = physicalActive() ? 'Sudamérica · ' + $('physical-category').value : region==='Mundo' ? 'Mapa mundial' : region;
+  $('scope').textContent = queue.length + (chileActive() || physicalActive() ? ' lugares' : region === 'Océanos' ? ' océanos' : region === 'Continentes' ? ' continentes' : ' países');
+  $('map-title').textContent = chileActive() ? 'Chile · ' + chileTheme() : physicalActive() ? 'Sudamérica · ' + $('physical-category').value : region==='Mundo' ? 'Mapa mundial' : region;
   updateScores();
   if (!study && audio && target) say(target.name);
 }
@@ -166,7 +267,13 @@ function start() {
   $('physical-picker').hidden = !physicalActive();
   $('south-countries').setAttribute('aria-pressed',String(!southPhysical));
   $('south-physical').setAttribute('aria-pressed',String(southPhysical));
-  const items = physicalActive() ? southAmericaPlaces[$('physical-category').value] : region === 'Océanos' ? oceans : region === 'Continentes' ? continents : playable.filter(c=>region==='Mundo' || c.region===region);
+  $('chile-menu').hidden = !chileActive();
+  $('chile-attribution').hidden = !chileActive();
+  $('chile-filter-label').hidden = !provincialMode();
+  const chileanOptions = chileActive()
+    ? chileItems[chileTheme()].filter(item=>!provincialMode() || !$('chile-filter').value || item.regionCode===$('chile-filter').value)
+    : null;
+  const items = chileanOptions || (physicalActive() ? southAmericaPlaces[$('physical-category').value] : region === 'Océanos' ? oceans : region === 'Continentes' ? continents : playable.filter(c=>region==='Mundo' || c.region===region));
   queue = shuffle(items);
   for (const button of $('regions').children) button.setAttribute('aria-pressed',String(button.textContent===region));
   $('quiz').setAttribute('aria-pressed',String(!study));
@@ -190,7 +297,15 @@ function paint(id, style) {
 }
 
 function focusItem(item) {
-  if (physicalActive()) {
+  if (chileActive() && !capitalsMode()) {
+    if (item.provinceCode==='052') updateView(rapaNuiView);
+    else {
+      const [x,y] = item.anchor;
+      updateView([x-2,y-2,4,4]);
+    }
+    return;
+  }
+  if (pointMode()) {
     const [x,y] = item.anchor;
     const neighbors = queue.filter(other=>other !== item);
     const distance = Math.min(...neighbors.map(({anchor:[ox,oy]})=>Math.hypot(x-ox,y-oy)));
@@ -213,7 +328,7 @@ function answer(id) {
     completed = new Set([id]);
     paint(id,'correct');
     $('target').textContent = item.name;
-    $('feedback').textContent = item.elevation ? item.elevation.toLocaleString('es-CL') + ' m según la lámina' : item.region || region;
+    $('feedback').textContent = item.detail || (item.elevation ? item.elevation.toLocaleString('es-CL') + ' m según la lámina' : item.region || region);
     if (audio) say(item.name);
     return;
   }
@@ -224,7 +339,11 @@ function answer(id) {
     streak++;
     completed.add(id);
     paint(id,'correct');
-    advance('¡Correcto! ' + target.name + '.',650);
+    if (effects) {
+      applause.currentTime = 0;
+      applause.play().catch(()=>{});
+    }
+    advance('¡Correcto! ' + target.name + '.',effects ? 760 : 650);
   } else {
     errors++;
     streak = 0;
@@ -251,6 +370,21 @@ function advance(message, delay) {
   },delay);
 }
 
+for (const category of Object.keys(chileItems)) {
+  const option = document.createElement('option');
+  option.value = option.textContent = category;
+  $('chile-category').append(option);
+}
+for (const [code,name] of chileDirectory) {
+  const option = document.createElement('option');
+  option.value = code;
+  option.textContent = name;
+  $('chile-filter').append(option);
+}
+$('chile-category').onchange = $('chile-filter').onchange = start;
+$('rapa-nui').onclick = () => updateView(rapaNuiView);
+$('open-chile').onclick = () => {region = 'Chile'; start();};
+
 for (const category of Object.keys(southAmericaPlaces)) {
   const option = document.createElement('option');
   option.value = option.textContent = category;
@@ -272,6 +406,20 @@ $('study').onclick = () => { if (!study) {study=true;start();} };
 $('restart').onclick = $('new-round').onclick = start;
 $('speak').onclick = () => say(queue[current]?.name);
 $('audio').disabled = !speechAvailable;
+$('voice').closest('label').hidden = !speechAvailable;
+if (speechAvailable) {
+  refreshVoices();
+  window.speechSynthesis.addEventListener('voiceschanged',refreshVoices);
+  $('voice').onchange = () => {
+    if (audio && !study) say(queue[current]?.name);
+  };
+}
+$('effects').onclick = () => {
+  effects = !effects;
+  if (!effects) applause.pause();
+  $('effects').setAttribute('aria-pressed',String(effects));
+  $('effects').textContent = effects ? 'Aplausos activados' : 'Aplausos desactivados';
+};
 $('audio').querySelector('span').textContent = speechAvailable ? 'Voz desactivada' : 'Voz no disponible';
 $('audio').onclick = () => {
   audio = !audio;

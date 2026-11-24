@@ -10,3 +10,12 @@ aside{display:grid;gap:13px}.question{padding:20px}.question-top{display:flex;ju
 @media(max-width:420px){.intro{align-items:start;flex-direction:column}.map-footer{font-size:11px}.top{height:59px}nav button{padding:6px 9px}}
 .interactive:hover .land,.interactive:focus-visible .land{fill:#52a98b}.correct .land{fill:#2b9c68}.wrong .land{fill:#dd7b70}.revealed .land{fill:#efbd66}
 .south-menu{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:0 0 15px}.south-menu[hidden],#physical-picker[hidden]{display:none}.south-tabs{display:flex;background:#e9efec;border-radius:11px;padding:4px}.south-tabs button{background:transparent;border:0;border-radius:8px;padding:7px 12px;font-size:14px;font-weight:650}.south-tabs button[aria-pressed=true]{background:white;color:var(--green);box-shadow:0 1px 4px #193f2420}#physical-picker{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}#physical-category{font:inherit;color:#182b37;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:white}.physical-dot{fill:#174a62;stroke:#fff;stroke-width:2;vector-effect:non-scaling-stroke}.physical-dot:hover,.physical-dot:focus-visible{fill:#478c9b;stroke-width:3}
+.audio-controls,.chile-menu{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.voice-picker,.chile-menu label{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--muted)}
+.voice-picker select,.chile-menu select,.chile-menu button,#open-chile{font:inherit;color:#182b37;background:white;border:1px solid var(--line);border-radius:9px;padding:7px 10px}
+.voice-picker select{max-width:170px}.chile-menu{margin-bottom:15px;gap:12px}.chile-menu select{max-width:min(270px,65vw)}
+.chile-menu[hidden],.chile-menu [hidden],.voice-picker[hidden],#chile-attribution[hidden]{display:none}
+#chile-attribution{margin-left:auto}.chile-shape{stroke:#fff;stroke-width:.75}
+#map.chile-map .land:not(.chile-shape){opacity:.5}
+#map .water{fill:var(--water-fill,#c7e4ef)}
+@media(max-width:800px){.top{height:auto;min-height:72px;padding-top:8px;padding-bottom:8px;gap:9px;flex-wrap:wrap}.top .audio-controls{gap:5px}.top button{padding:6px 8px;font-size:13px}.voice-picker select{max-width:130px}}

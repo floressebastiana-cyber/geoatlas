@@ -5,19 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Aprende a ubicar los países, continentes y océanos del mundo en un mapa interactivo.">
 <title>geoatlas · Explora el mundo</title>
-<link rel="stylesheet" href="style.css?v=sudamerica">
+<link rel="stylesheet" href="style.css?v=chile">
 <script defer src="map-data.js"></script>
 <script defer src="south-america.js"></script>
-<script defer src="game.js?v=sudamerica"></script>
+<script defer src="chile-map.js"></script>
+<script defer src="chile.js"></script>
+<script defer src="game.js?v=chile"></script>
 </head>
 <body>
-<header class="top"><div class="brand"><span class="logo" aria-hidden="true">◎</span><div><strong>geoatlas</strong><small>ATLAS INTERACTIVO</small></div></div><button id="audio" aria-pressed="false">♫ <span>Voz desactivada</span></button></header>
+<header class="top"><div class="brand"><span class="logo" aria-hidden="true">◎</span><div><strong>geoatlas</strong><small>ATLAS INTERACTIVO</small></div></div><div class="audio-controls"><label class="voice-picker">Voz <select id="voice"><option value="">Automática</option></select></label><button id="effects" aria-pressed="true">Aplausos activados</button><button id="audio" aria-pressed="false">♫ <span>Voz desactivada</span></button></div></header>
 <main>
   <div class="intro"><div><h1>Explora el mundo<span>.</span></h1><p>Aprende geografía, un lugar a la vez.</p></div><div class="tabs" aria-label="Modo de juego"><button id="quiz" aria-pressed="true">Jugar</button><button id="study" aria-pressed="false">Estudiar</button></div></div>
   <nav id="regions" aria-label="Ámbito de juego"></nav>
   <div id="south-menu" class="south-menu" hidden>
     <div class="south-tabs" role="group" aria-label="Contenido de Sudamérica"><button id="south-countries" aria-pressed="true">Países</button><button id="south-physical" aria-pressed="false">Geografía física</button></div>
+    <button id="open-chile">Chile</button>
     <label id="physical-picker" hidden>Tema <select id="physical-category"></select></label>
+  </div>
+  <div id="chile-menu" class="chile-menu" hidden>
+    <label>Practicar <select id="chile-category"></select></label>
+    <label id="chile-filter-label" hidden>Región <select id="chile-filter"><option value="">Todas</option></select></label>
+    <button id="rapa-nui">Ver Rapa Nui</button>
   </div>
   <div class="layout">
     <section class="map-card" aria-label="Mapa interactivo">
@@ -27,11 +35,11 @@
           <defs><pattern id="grid" width="15" height="15" patternUnits="userSpaceOnUse"><path d="M15 0H0V15" fill="none" stroke="#b9d4dc" stroke-width=".24"/></pattern></defs>
           <rect x="-500" y="-500" width="1400" height="1200" fill="#dceef2"/>
           <rect x="-500" y="-500" width="1400" height="1200" fill="url(#grid)"/>
-          <g id="waters"></g><g id="lands"></g><g id="markers"></g>
+          <g id="waters"></g><g id="lands"></g><g id="chile-shapes"></g><g id="markers"></g>
         </svg>
         <div class="zoom" aria-label="Controles del mapa"><button id="zoom-in" aria-label="Acercar">+</button><button id="zoom-out" aria-label="Alejar">−</button><button id="reset" aria-label="Centrar mapa">⌖</button></div>
       </div>
-      <div class="map-footer"><span>Arrastra para mover el mapa · Usa + y − para ampliar</span><a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a></div>
+      <div class="map-footer"><span>Arrastra para mover el mapa · Usa + y − para ampliar</span><a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a><a id="chile-attribution" hidden href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries · © OpenStreetMap</a></div>
     </section>
     <aside>
       <section class="question">
