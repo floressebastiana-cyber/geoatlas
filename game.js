@@ -38,8 +38,8 @@ let voiceContext;
 let voiceBuffer;
 let voiceSource;
 let voiceRequest = 0;
-const applause = new Audio('applause.wav?v=redoble');
-applause.volume = .52;
+const applause = new Audio('applause.wav?v=notas');
+applause.volume = .44;
 let effects = true;
 const chileActive = () => region === 'Chile';
 const chileTheme = () => $('chile-category').value;
@@ -385,7 +385,7 @@ function answer(id) {
       applause.currentTime = 0;
       applause.play().catch(()=>{});
     }
-    advance('¡Correcto! ' + target.name + '.',effects ? 1080 : 650);
+    advance('¡Correcto! ' + target.name + '.',effects ? 880 : 650);
   } else {
     errors++;
     streak = 0;
