@@ -38,7 +38,7 @@ let voiceContext;
 let voiceBuffer;
 let voiceSource;
 let voiceRequest = 0;
-const applause = new Audio('applause.wav?v=celebracion');
+const applause = new Audio('applause.wav?v=redoble');
 applause.volume = .52;
 let effects = true;
 const chileActive = () => region === 'Chile';
