@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Aprende a ubicar los países, continentes y océanos del mundo en un mapa interactivo.">
 <title>geoatlas · Explora el mundo</title>
-<link rel="stylesheet" href="style.css?v=chile-voz">
+<link rel="stylesheet" href="style.css?v=chile-fisico">
 <script defer src="map-data.js"></script>
 <script defer src="south-america.js"></script>
 <script defer src="chile-map.js"></script>
 <script defer src="chile.js"></script>
-<script defer src="voice-index.js"></script>
-<script defer src="game.js?v=notas"></script>
+<script defer src="chile-physical.js"></script>
+<script defer src="voice-index.js?v=chile-fisico"></script>
+<script defer src="game.js?v=chile-fisico"></script>
 </head>
 <body>
 <header class="top"><div class="brand"><span class="logo" aria-hidden="true">◎</span><div><strong>geoatlas</strong><small>ATLAS INTERACTIVO</small></div></div><div class="audio-controls"><label class="voice-picker">Voz <select id="voice"><option value="">Daniela · Argentina</option></select></label><button id="effects" aria-pressed="true">Aplausos activados</button><button id="audio" aria-pressed="false">♫ <span>Voz desactivada</span></button></div></header>
@@ -28,6 +29,7 @@
     <label id="chile-filter-label" hidden>Región <select id="chile-filter"><option value="">Todas</option></select></label>
     <button id="rapa-nui">Ver Rapa Nui</button>
   </div>
+  <p id="chile-reference-note" hidden>Ubicaciones de referencia. Los puntos de las cuencas indican un sector del sistema.</p>
   <div class="layout">
     <section class="map-card" aria-label="Mapa interactivo">
       <div class="map-header"><strong id="map-title">Mapa mundial</strong><span><i></i> Interactivo</span></div>

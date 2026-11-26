@@ -45,7 +45,12 @@ const chileActive = () => region === 'Chile';
 const chileTheme = () => $('chile-category').value;
 const provincialMode = () => ['Provincias','Capitales provinciales'].includes(chileTheme());
 const capitalsMode = () => chileTheme().startsWith('Capitales');
-const pointMode = () => physicalActive() || (chileActive() && capitalsMode());
+const chilePhysicalMode = () => Object.hasOwn(chilePhysical,chileTheme());
+const chileFilterMode = () => provincialMode() || chilePhysicalMode();
+const pointMode = () => physicalActive() || (chileActive() && (capitalsMode() || chilePhysicalMode()));
+const inChileRegion = (item,code) => !code || item.regionCode === code || item.otherRegion === code;
+const antarcticView = [106,143,22,15];
+const markerColors = {'Volcanes':'#a64330','Cerros':'#69467c','Montes':'#315e54','Cuencas hidrográficas':'#156080','Embalses':'#246bb1'};
 let region = 'Mundo';
 let study = false;
 let southPhysical = false;
@@ -157,9 +162,11 @@ function setupMap() {
 }
 
 function chileViewForFilter() {
-  const code = provincialMode() && $('chile-filter').value;
+  const code = chileFilterMode() && $('chile-filter').value;
   if (!code) return chileView;
-  const mainland = chileItems.Provincias.filter(item=>item.regionCode===code && item.provinceCode!=='052');
+  const filtered = chilePhysicalMode() ? queue : chileItems.Provincias.filter(item=>item.regionCode===code);
+  const mainland = filtered.filter(item=>item.provinceCode!=='052' && item.name!=='Territorio Chileno Antártico');
+  if (!mainland.length) return chileView;
   const xs = mainland.map(item=>item.anchor[0]);
   const ys = mainland.map(item=>item.anchor[1]);
   const width = Math.max(4, Math.max(...xs)-Math.min(...xs)+2);
@@ -185,10 +192,12 @@ function drawChile(available) {
     }
     shapes.append(group);
   }
-  if (!capitalsMode()) return;
+  if (!capitalsMode() && !chilePhysicalMode()) return;
   for (const item of queue) {
     const [cx,cy] = item.anchor;
+    const color = markerColors[chileTheme()];
     const dot = svgElement('circle',{cx,cy,class:'physical-dot'});
+    if (color) dot.style.fill = color;
     interactive(dot,item);
     $('markers').append(dot);
   }
@@ -249,7 +258,7 @@ async function say(name) {
     try {
       voiceContext ||= new VoiceContext();
       const resumed = voiceContext.resume();
-      voiceBuffer ||= fetch('voice-daniela.mp3')
+      voiceBuffer ||= fetch('voice-daniela.mp3?v=chile-fisico')
         .then(response=>{
           if (!response.ok) throw Error('No se pudo cargar la voz');
           return response.arrayBuffer();
@@ -287,7 +296,7 @@ function updatePanel() {
   $('mode-label').textContent = study ? 'ESTUDIO' : 'DESAFÍO';
   $('instruction').textContent = study ? 'Toca cualquier lugar activo' : done ? 'Partida completada' : 'Encuentra en el mapa';
   $('target').textContent = study ? 'Explora el mapa' : done ? '¡Bien hecho!' : target.name;
-  $('feedback').textContent = study ? 'Selecciona un lugar para conocer su nombre.' : done ? correct + ' aciertos de ' + queue.length + ' lugares.' : 'Selecciona el lugar indicado.';
+  $('feedback').textContent = study ? 'Selecciona un lugar para consultar su ficha.' : done ? correct + ' aciertos de ' + queue.length + ' lugares.' : 'Selecciona el lugar indicado.';
   $('speak').hidden = !voiceSupported || study || done;
   $('hint').hidden = study || done;
   $('skip').hidden = study || done;
@@ -311,9 +320,19 @@ function start() {
   $('south-physical').setAttribute('aria-pressed',String(southPhysical));
   $('chile-menu').hidden = !chileActive();
   $('chile-attribution').hidden = !chileActive();
-  $('chile-filter-label').hidden = !provincialMode();
+  $('chile-filter-label').hidden = !chileFilterMode();
+  const categoryItems = chileItems[chileTheme()];
+  if (chileFilterMode()) {
+    for (const option of $('chile-filter').options) {
+      option.disabled = !!option.value && !categoryItems.some(item=>inChileRegion(item,option.value));
+    }
+    if ($('chile-filter').selectedOptions[0]?.disabled) $('chile-filter').value = '';
+  }
+  $('rapa-nui').hidden = chilePhysicalMode() && chileTheme() !== 'Cuencas hidrográficas';
+  $('rapa-nui').textContent = chilePhysicalMode() ? 'Ver Antártica' : 'Ver Rapa Nui';
+  $('chile-reference-note').hidden = !chileActive() || !chilePhysicalMode();
   const chileanOptions = chileActive()
-    ? chileItems[chileTheme()].filter(item=>!provincialMode() || !$('chile-filter').value || item.regionCode===$('chile-filter').value)
+    ? categoryItems.filter(item=>!chileFilterMode() || inChileRegion(item,$('chile-filter').value))
     : null;
   const items = chileanOptions || (physicalActive() ? southAmericaPlaces[$('physical-category').value] : region === 'Océanos' ? oceans : region === 'Continentes' ? continents : playable.filter(c=>region==='Mundo' || c.region===region));
   queue = shuffle(items);
@@ -339,7 +358,7 @@ function paint(id, style) {
 }
 
 function focusItem(item) {
-  if (chileActive() && !capitalsMode()) {
+  if (chileActive() && !pointMode()) {
     if (item.provinceCode==='052') updateView(rapaNuiView);
     else {
       const [x,y] = item.anchor;
@@ -424,7 +443,7 @@ for (const [code,name] of chileDirectory) {
   $('chile-filter').append(option);
 }
 $('chile-category').onchange = $('chile-filter').onchange = start;
-$('rapa-nui').onclick = () => updateView(rapaNuiView);
+$('rapa-nui').onclick = () => updateView(chilePhysicalMode() ? antarcticView : rapaNuiView);
 $('open-chile').onclick = () => {region = 'Chile'; start();};
 
 for (const category of Object.keys(southAmericaPlaces)) {
