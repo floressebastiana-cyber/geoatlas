@@ -5,14 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Aprende a ubicar los países, continentes y océanos del mundo en un mapa interactivo.">
 <title>geoatlas · Explora el mundo</title>
-<link rel="stylesheet" href="style.css?v=chile-fisico">
+<link rel="stylesheet" href="style.css?v=rios">
 <script defer src="map-data.js"></script>
 <script defer src="south-america.js"></script>
 <script defer src="chile-map.js"></script>
 <script defer src="chile.js"></script>
 <script defer src="chile-physical.js"></script>
+<script defer src="chile-rivers.js"></script>
 <script defer src="voice-index.js?v=chile-fisico"></script>
-<script defer src="game.js?v=chile-fisico"></script>
+<script defer src="game.js?v=rios"></script>
 </head>
 <body>
 <header class="top"><div class="brand"><span class="logo" aria-hidden="true">◎</span><div><strong>geoatlas</strong><small>ATLAS INTERACTIVO</small></div></div><div class="audio-controls"><label class="voice-picker">Voz <select id="voice"><option value="">Daniela · Argentina</option></select></label><button id="effects" aria-pressed="true">Aplausos activados</button><button id="audio" aria-pressed="false">♫ <span>Voz desactivada</span></button></div></header>
@@ -29,7 +30,7 @@
     <label id="chile-filter-label" hidden>Región <select id="chile-filter"><option value="">Todas</option></select></label>
     <button id="rapa-nui">Ver Rapa Nui</button>
   </div>
-  <p id="chile-reference-note" hidden>Ubicaciones de referencia. Los puntos de las cuencas indican un sector del sistema.</p>
+  <p id="chile-reference-note" hidden></p>
   <div class="layout">
     <section class="map-card" aria-label="Mapa interactivo">
       <div class="map-header"><strong id="map-title">Mapa mundial</strong><span><i></i> Interactivo</span></div>
@@ -38,7 +39,7 @@
           <defs><pattern id="grid" width="15" height="15" patternUnits="userSpaceOnUse"><path d="M15 0H0V15" fill="none" stroke="#b9d4dc" stroke-width=".24"/></pattern></defs>
           <rect x="-500" y="-500" width="1400" height="1200" fill="#dceef2"/>
           <rect x="-500" y="-500" width="1400" height="1200" fill="url(#grid)"/>
-          <g id="waters"></g><g id="lands"></g><g id="chile-shapes"></g><g id="markers"></g>
+          <g id="waters"></g><g id="lands"></g><g id="chile-shapes"></g><g id="chile-rivers"></g><g id="markers"></g>
         </svg>
         <div class="zoom" aria-label="Controles del mapa"><button id="zoom-in" aria-label="Acercar">+</button><button id="zoom-out" aria-label="Alejar">−</button><button id="reset" aria-label="Centrar mapa">⌖</button></div>
       </div>

@@ -45,6 +45,7 @@ const chileActive = () => region === 'Chile';
 const chileTheme = () => $('chile-category').value;
 const provincialMode = () => ['Provincias','Capitales provinciales'].includes(chileTheme());
 const capitalsMode = () => chileTheme().startsWith('Capitales');
+const basinMode = () => chileActive() && chileTheme() === 'Cuencas hidrográficas';
 const chilePhysicalMode = () => Object.hasOwn(chilePhysical,chileTheme());
 const chileFilterMode = () => provincialMode() || chilePhysicalMode();
 const pointMode = () => physicalActive() || (chileActive() && (capitalsMode() || chilePhysicalMode()));
@@ -102,6 +103,7 @@ function setupMap() {
   $('lands').replaceChildren();
   $('waters').replaceChildren();
   $('markers').replaceChildren();
+  $('chile-rivers').replaceChildren();
   $('chile-shapes').replaceChildren();
   map.classList.toggle('chile-map',chileActive());
   const oceanMode = region === 'Océanos';
@@ -194,6 +196,15 @@ function drawChile(available) {
   }
   if (!capitalsMode() && !chilePhysicalMode()) return;
   for (const item of queue) {
+    const river = basinMode() && chileRivers[item.name];
+    if (river) {
+      const group = svgElement('g',{class:'river-channel'});
+      interactive(group,item);
+      group.append(svgElement('path',{d:river.path,class:'river-hit','aria-hidden':'true'}));
+      group.append(svgElement('path',{d:river.path,class:'river-line','aria-hidden':'true'}));
+      $('chile-rivers').append(group);
+      continue;
+    }
     const [cx,cy] = item.anchor;
     const color = markerColors[chileTheme()];
     const dot = svgElement('circle',{cx,cy,class:'physical-dot'});
@@ -331,6 +342,9 @@ function start() {
   $('rapa-nui').hidden = chilePhysicalMode() && chileTheme() !== 'Cuencas hidrográficas';
   $('rapa-nui').textContent = chilePhysicalMode() ? 'Ver Antártica' : 'Ver Rapa Nui';
   $('chile-reference-note').hidden = !chileActive() || !chilePhysicalMode();
+  $('chile-reference-note').textContent = basinMode()
+    ? 'Selecciona un río en azul o el marcador de otro sistema hídrico.'
+    : 'Los puntos muestran ubicaciones de referencia.';
   const chileanOptions = chileActive()
     ? categoryItems.filter(item=>!chileFilterMode() || inChileRegion(item,$('chile-filter').value))
     : null;
@@ -358,6 +372,14 @@ function paint(id, style) {
 }
 
 function focusItem(item) {
+  const river = basinMode() && chileRivers[item.name];
+  if (river) {
+    const [x1,y1,x2,y2] = river.box;
+    const width = Math.max(1.6,(x2-x1)*1.4,(y2-y1)*1.6);
+    const height = Math.max(1.25,(y2-y1)*1.4);
+    updateView([(x1+x2-width)/2,(y1+y2-height)/2,width,height]);
+    return;
+  }
   if (chileActive() && !pointMode()) {
     if (item.provinceCode==='052') updateView(rapaNuiView);
     else {
