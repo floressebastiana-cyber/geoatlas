@@ -2,18 +2,24 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Aprende a ubicar los países, continentes y océanos del mundo en un mapa interactivo.">
+<meta name="theme-color" content="#176952">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="geoatlas">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="geoatlas-180.png">
 <title>geoatlas · Explora el mundo</title>
-<link rel="stylesheet" href="style.css?v=rios">
+<link rel="stylesheet" href="style.css?v=rios-movil">
 <script defer src="map-data.js"></script>
 <script defer src="south-america.js"></script>
 <script defer src="chile-map.js"></script>
 <script defer src="chile.js"></script>
 <script defer src="chile-physical.js"></script>
-<script defer src="chile-rivers.js"></script>
+<script defer src="chile-rivers.js?v=rios-movil"></script>
 <script defer src="voice-index.js?v=chile-fisico"></script>
-<script defer src="game.js?v=rios"></script>
+<script defer src="game.js?v=rios-movil"></script>
 </head>
 <body>
 <header class="top"><div class="brand"><span class="logo" aria-hidden="true">◎</span><div><strong>geoatlas</strong><small>ATLAS INTERACTIVO</small></div></div><div class="audio-controls"><label class="voice-picker">Voz <select id="voice"><option value="">Daniela · Argentina</option></select></label><button id="effects" aria-pressed="true">Aplausos activados</button><button id="audio" aria-pressed="false">♫ <span>Voz desactivada</span></button></div></header>

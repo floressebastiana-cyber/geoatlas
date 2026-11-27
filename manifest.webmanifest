@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "geoatlas",
+  "short_name": "geoatlas",
+  "description": "Practica geografía mundial y de Chile en mapas interactivos.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f8f7",
+  "theme_color": "#176952",
+  "icons": [
+    {"src": "geoatlas-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "geoatlas-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}

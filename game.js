@@ -88,6 +88,8 @@ function updateView(next) {
   view = next.slice();
   map.setAttribute('viewBox', view.join(' '));
   const scale = map.getScreenCTM()?.a;
+  // Scale SVG strokes explicitly to avoid distorted caps in mobile Safari.
+  $('chile-rivers').style.setProperty('--river-unit', String(scale > 0 ? 1 / scale : 1));
   for (const dot of $('markers').children) {
     dot.setAttribute('r', pointMode() && scale ? 7 / scale : Math.min(1.25, view[2] / 230));
   }
