@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pueblos originarios de Chile · GeoAtlas</title>
+<link rel="stylesheet" href="style.css?v=rios-cursor">
+<style>
+.study-nav{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.study-nav a{display:inline-flex;padding:10px 14px;border-radius:9px;background:#e5f3ed;color:#176952;font-weight:650}
+.study-panel{margin:18px 0;padding:clamp(14px,3vw,25px);background:white;border:1px solid var(--line);border-radius:17px}
+.study-panel h2{margin-top:0}
+.study-panel img{display:block;width:100%;height:auto;max-width:700px;margin:auto}
+.study-panel dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
+.study-panel dl div{padding:14px;background:#edf5f2;border-radius:10px}
+.study-panel dt{font-weight:700}
+.study-panel dd{margin:6px 0 0}
+.study-panel summary{cursor:pointer;font-weight:650;margin:14px 0}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand"><span class="logo" aria-hidden="true">◎</span><div><strong>geoatlas</strong><small>ATLAS INTERACTIVO</small></div></div></header>
+<main>
+<div class="intro"><div><h1>Pueblos originarios de Chile<span>.</span></h1><p>Distribución territorial y actividades económicas hacia 1535.</p></div></div>
+<nav class="study-nav" aria-label="Contenido del apartado">
+<a href="./?region=chile">Volver a Chile</a><a href="#territorios">Mapa de los pueblos</a><a href="#actividades">Actividades económicas</a>
+</nav>
+<section id="territorios" class="study-panel">
+<h2>Pueblos originarios hacia 1535</h2>
+<p>Usa la leyenda para localizar a cada pueblo. Toca el mapa para abrirlo en tamaño completo.</p>
+<a href="pueblos-mapa.png"><img src="pueblos-mapa.png" alt="Mapa histórico de Chile hacia 1535 con la distribución territorial de sus pueblos originarios y un recuadro de Rapa Nui."></a>
+<details><summary>Pueblos de la leyenda</summary><p>Aimaras, Licanantay, Diaguitas, Changos, Picunches, Mapuches, Huilliches, Cuncos, Chiquiyanes, Pehuenches, Puelches, Poyas, Chonos, Aónikenk, Kawashkar, Selk’nam, Yaganes y Rapa Nui.</p></details>
+</section>
+<section id="actividades" class="study-panel">
+<h2>Actividades económicas hacia 1535</h2>
+<p>Estas asociaciones siguen la guía de referencia. Un pueblo puede aparecer en más de una actividad.</p>
+<dl>
+<div><dt>Pesca y horticultura</dt><dd>Cuncos.</dd></div>
+<div><dt>Pesca y recolección</dt><dd>Changos, Chonos, Kawashkar y Yaganes.</dd></div>
+<div><dt>Recolección terrestre</dt><dd>Chiquiyanes, Pehuenches, Puelches, Aónikenk y Selk’nam.</dd></div>
+<div><dt>Agricultura</dt><dd>Aimaras, Licanantay, Rapa Nui y Diaguitas.</dd></div>
+<div><dt>Horticultura</dt><dd>Picunches, Mapuches, Huilliches y Poyas.</dd></div>
+<div><dt>Pastoreo</dt><dd>Aimaras, Licanantay, Picunches y Mapuches.</dd></div>
+<div><dt>Caza</dt><dd>Diaguitas, Chiquiyanes, Pehuenches, Puelches, Aónikenk y Selk’nam.</dd></div>
+</dl>
+<details open><summary>Mapa de actividades económicas</summary><a href="pueblos-economia.png"><img loading="lazy" src="pueblos-economia.png" alt="Mapa de Chile con la distribución de actividades económicas de los pueblos originarios hacia 1535."></a></details>
+<details><summary>Guía de actividades por pueblo</summary><a href="pueblos-guia.png"><img loading="lazy" src="pueblos-guia.png" alt="Guía visual que relaciona cada actividad económica con los pueblos que la practicaban."></a></details>
+</section>
+</main>
+</body>
+</html>

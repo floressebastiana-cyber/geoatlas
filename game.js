@@ -52,7 +52,7 @@ const pointMode = () => physicalActive() || (chileActive() && (capitalsMode() ||
 const inChileRegion = (item,code) => !code || item.regionCode === code || item.otherRegion === code;
 const antarcticView = [106,143,22,15];
 const markerColors = {'Volcanes':'#a64330','Cerros':'#69467c','Montes':'#315e54','Cuencas hidrográficas':'#156080','Embalses':'#246bb1'};
-let region = 'Mundo';
+let region = new URLSearchParams(location.search).get('region') === 'chile' ? 'Chile' : 'Mundo';
 let study = false;
 let southPhysical = false;
 const physicalActive = () => region === 'Sudamérica' && southPhysical;
