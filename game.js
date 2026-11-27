@@ -44,14 +44,15 @@ let effects = true;
 const chileActive = () => region === 'Chile';
 const chileTheme = () => $('chile-category').value;
 const provincialMode = () => ['Provincias','Capitales provinciales'].includes(chileTheme());
+const indigenousMode = () => chileActive() && chileTheme() === 'Pueblos originarios';
 const capitalsMode = () => chileTheme().startsWith('Capitales');
 const basinMode = () => chileActive() && chileTheme() === 'Cuencas hidrográficas';
 const chilePhysicalMode = () => Object.hasOwn(chilePhysical,chileTheme());
 const chileFilterMode = () => provincialMode() || chilePhysicalMode();
-const pointMode = () => physicalActive() || (chileActive() && (capitalsMode() || chilePhysicalMode()));
+const pointMode = () => physicalActive() || (chileActive() && (capitalsMode() || chilePhysicalMode() || indigenousMode()));
 const inChileRegion = (item,code) => !code || item.regionCode === code || item.otherRegion === code;
 const antarcticView = [106,143,22,15];
-const markerColors = {'Volcanes':'#a64330','Cerros':'#69467c','Montes':'#315e54','Cuencas hidrográficas':'#156080','Embalses':'#246bb1'};
+const markerColors = {'Pueblos originarios':'#82446b','Volcanes':'#a64330','Cerros':'#69467c','Montes':'#315e54','Cuencas hidrográficas':'#156080','Embalses':'#246bb1'};
 let region = new URLSearchParams(location.search).get('region') === 'chile' ? 'Chile' : 'Mundo';
 let study = false;
 let southPhysical = false;
@@ -86,6 +87,7 @@ function interactive(element, item) {
 
 function updateView(next) {
   view = next.slice();
+  if (indigenousMode()) $('rapa-nui').textContent = next[0] < 90 ? 'Ver Chile continental' : 'Ver Rapa Nui';
   map.setAttribute('viewBox', view.join(' '));
   const scale = map.getScreenCTM()?.a;
   // Scale SVG strokes explicitly to avoid distorted caps in mobile Safari.
@@ -196,7 +198,7 @@ function drawChile(available) {
     }
     shapes.append(group);
   }
-  if (!capitalsMode() && !chilePhysicalMode()) return;
+  if (!capitalsMode() && !chilePhysicalMode() && !indigenousMode()) return;
   for (const item of queue) {
     const river = basinMode() && chileRivers[item.name];
     if (river) {
@@ -343,10 +345,12 @@ function start() {
   }
   $('rapa-nui').hidden = chilePhysicalMode() && chileTheme() !== 'Cuencas hidrográficas';
   $('rapa-nui').textContent = chilePhysicalMode() ? 'Ver Antártica' : 'Ver Rapa Nui';
-  $('chile-reference-note').hidden = !chileActive() || !chilePhysicalMode();
+  $('chile-reference-note').hidden = !chileActive() || (!chilePhysicalMode() && !indigenousMode());
   $('chile-reference-note').textContent = basinMode()
     ? 'Selecciona un río en azul o el marcador de otro sistema hídrico.'
-    : 'Los puntos muestran ubicaciones de referencia.';
+    : indigenousMode()
+      ? 'Selecciona el punto que representa el territorio histórico. Para Rapa Nui, usa el botón Ver Rapa Nui.'
+      : 'Los puntos muestran ubicaciones de referencia.';
   const chileanOptions = chileActive()
     ? categoryItems.filter(item=>!chileFilterMode() || inChileRegion(item,$('chile-filter').value))
     : null;
@@ -460,6 +464,9 @@ for (const category of Object.keys(chileItems)) {
   option.value = option.textContent = category;
   $('chile-category').append(option);
 }
+if (chileActive() && new URLSearchParams(location.search).get('tema') === 'pueblos') {
+  $('chile-category').value = 'Pueblos originarios';
+}
 for (const [code,name] of chileDirectory) {
   const option = document.createElement('option');
   option.value = code;
@@ -467,7 +474,7 @@ for (const [code,name] of chileDirectory) {
   $('chile-filter').append(option);
 }
 $('chile-category').onchange = $('chile-filter').onchange = start;
-$('rapa-nui').onclick = () => updateView(chilePhysicalMode() ? antarcticView : rapaNuiView);
+$('rapa-nui').onclick = () => updateView(chilePhysicalMode() ? antarcticView : indigenousMode() && view[0] < 90 ? homeView : rapaNuiView);
 $('open-chile').onclick = () => {region = 'Chile'; start();};
 
 for (const category of Object.keys(southAmericaPlaces)) {
